@@ -49,7 +49,7 @@ def make_move(state):
         best_state = None
         best_score = None
         # find the best possible state use minimax
-        for succ in self.succ(state, ai_piece):
+        for succ in success(state, ai_piece):
             score = self.max_value(succ, 0)
             if best_state == None or score > best_score:
                 best_state = succ
@@ -81,7 +81,7 @@ def make_move(state):
             # find the best possible state using minimax.
         best = None
         max_score = None
-        for succ in self.succ(state, ai_piece):
+        for succ in success(state, ai_piece):
             score = self.max_value(succ, 0)
             if best == None or score > max_score:
                 best = succ
@@ -106,6 +106,306 @@ def make_move(state):
         move.append((source_row, source_col))
         move.insert(0, (target_row, target_col))
         return move
+    
+def success(state, curr_piece):
+    """
+    Get all the successors of the current state
+    param: state: the current state of board, to generate new states. curr_piece: which player's move, r or b
+    return: a list of lists of list -  a list of possible states the board could be
+    """
+    # return value here
+    legal_succs = []
+
+    # check if it is in drop phase or not
+    num_piece = 0
+    for row in state:
+        for column in row:
+            if column != ' ':
+                num_piece += 1
+
+    drop_phase = True if num_piece < 8 else False
+    # if drop phase, just replace one space a time with the current player's piece
+    if drop_phase:
+        for i in range(len(state)):
+            for j in range(len(state[0])):
+                if state[i][j] == ' ':
+                    tmp = copy.deepcopy(state)
+                    tmp[i][j] = curr_piece
+                    legal_succs.append(tmp)
+                    
+    else:
+        # if not in drop phase, move each possible piece
+        for i in range(len(state)):
+            for j in range(len(state[0])):
+                # depend on different position, check for different possible position to go to
+                if state[i][j] == ai_piece:
+                    if i == 0:
+                        if j == 0:
+                            if state[i][j+1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i, j], [i, j+1], curr_piece))
+                            if state[i+1][j] == ' ':
+                                legal_succs.append(get_possible_case(state, [i, j], [i+1, j], curr_piece))
+                            if state[i+1][j+1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i, j], [i+1, j+1], curr_piece))
+                        if j > 0 and j < len(state[0]) - 1:
+                            if state[i][j-1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i, j-1], curr_piece))
+                            if state[i][j+1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i, j+1], curr_piece))
+                            if state[i+1][j-1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i+1, j-1], curr_piece))
+                            if state[i+1][j] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i+1,j], curr_piece))
+                            if state[i+1][j+1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i+1, j+1], curr_piece))
+                        if j == len(state[0]):
+                            if state[i][j-1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i, j-1], curr_piece))
+                            if state[i+1][j-1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i+1, j-1], curr_piece))
+                            if state[i+1][j] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i+1, j], curr_piece))
+                    elif i > 0 and i < len(state) - 1:
+                        if j == 0:
+                            if state[i-1][j] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i-1, j], curr_piece))
+                            if state[i-1][j+1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i-1, j+1], curr_piece))
+                            if state[i][j+1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i, j], [i, j+1], curr_piece))
+                            if state[i+1][j] == ' ':
+                                legal_succs.append(get_possible_case(state, [i, j], [i+1, j], curr_piece))
+                            if state[i+1][j+1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i, j], [i+1, j+1], curr_piece))
+                        if j > 0 and j < len(state[0]) - 1:
+                            if state[i-1][j-1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i-1, j-1], curr_piece))
+                            if state[i-1][j] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i-1,j], curr_piece))
+                            if state[i-1][j+1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i-1,j+1], curr_piece))
+                            if state[i][j-1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i, j-1], curr_piece))
+                            if state[i][j+1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i, j+1], curr_piece))
+                            if state[i+1][j-1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i+1, j-1], curr_piece))
+                            if state[i+1][j] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i+1,j], curr_piece))
+                            if state[i+1][j+1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i+1, j+1], curr_piece))
+                        if j == len(state[0]):
+                            if state[i-1][j-1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i-1,j-1], curr_piece))
+                            if state[i-1][j] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i-1,j], curr_piece))
+                            if state[i][j-1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i, j-1], curr_piece))
+                            if state[i+1][j-1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i+1, j-1], curr_piece))
+                            if state[i+1][j] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i+1, j], curr_piece))
+                    elif i == len(state) - 1:
+                        if j == 0:
+                            if state[i-1][j] == ' ':
+                                legal_succs.append(get_possible_case(state, [i, j], [i-1, j], curr_piece))
+                            if state[i-1][j+1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i, j], [i-1, j+1], curr_piece))
+                            if state[i][j+1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i, j], [i, j+1], curr_piece))
+                        if j > 0 and j < len(state[0]) - 1:
+                            if state[i-1][j-1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i-1, j-1], curr_piece))
+                            if state[i-1][j] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i-1, j], curr_piece))
+                            if state[i-1][j+1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i-1, j+1], curr_piece))
+                            if state[i][j-1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i,j-1], curr_piece))
+                            if state[i][j+1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i,j+1], curr_piece))
+                        if j == len(state[0]):
+                            if state[i-1][j-1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i-1, j-1], curr_piece))
+                            if state[i-1][j] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i-1, j], curr_piece))
+                            if state[i][j-1] == ' ':
+                                legal_succs.append(get_possible_case(state, [i,j], [i, j-1], curr_piece))
+    return legal_succs
+
+def get_possible_case(state, source, to, piece):
+    """
+    Helper functions return a new case base on source and destination
+    param: state - current state of board. source - list of form [x,y] source point. to. list of form [x,y] of destination point. piece - r or b, current player
+    return temp - a state where piece moved from source to destination
+    """
+    temp = copy.deepcopy(state)
+    temp[source[0]][source[1]] = ' '
+    temp[to[0]][to[1]] = piece
+    return temp
+
+def game_value(state):
+    """ Checks the current board status for a win condition
+
+    Args:
+    state (list of lists): either the current state of the game as saved in
+        this TeekoPlayer object, or a generated successor state.
+
+    Returns:
+        int: 1 if this TeekoPlayer wins, -1 if the opponent wins, 0 if no winner
+
+    TODO: complete checks for diagonal and box wins
+    """
+    # check horizontal wins
+    for row in state:
+        for i in range(2):
+            if row[i] != ' ' and row[i] == row[i + 1] == row[i + 2] == row[i + 3]:
+                return 1 if row[i] == ai_piece else -1
+
+    # check vertical wins
+    for col in range(5):
+        for i in range(2):
+            if state[i][col] != ' ' and state[i][col] == state[i + 1][col] == state[i + 2][col] == state[i + 3][col]:
+                return 1 if state[i][col] == ai_piece else -1
+
+    # TODO: check \ diagonal wins
+    for row in range(2):
+        for col in range(2):
+            if state[row][col] != ' ':
+                if state[row][col] == state[row+1][col+1] == state[row+2][col+2] == state[row+3][col+3]:
+                    return 1 if state[row][col] == ai_piece else -1
+    # TODO: check / diagonal wins
+    for row in range(2):
+        for col in range(3, 5):
+            if state[row][col] != ' ':
+                if state[row][col] == state[row+1][col-1] == state[row+2][col-2] == state[row+3][col-3]:
+                    return 1 if state[row][col] == ai_piece else -1
+
+    # TODO: check box wins
+    for row in range(4):
+        for col in range(4):
+            if state[row][col] != ' ':
+                if state[row][col] == state[row][col + 1] == state[row+1][col] == state[row+1][col+1]:
+                    return 1 if state[row][col] == ai_piece else -1
+    return 0  # no winner yet
+
+def heuristic_game_value(state):
+    """
+    Evaluate the game heuristically by calculating the distances between pieces.
+    param: state, the current state of the game
+    return: a value between -1 and 1 indicating the distance between pieces.
+    """
+    if game_value(state) == -1 or game_value(state) == 1:
+        return game_value(state)
+    index_ai = []
+    index_opp = []
+    # find index where ai's piece is and opponents piece is at
+    for i in range(len(state)):
+        for j in range(len(state[i])):
+            if state[i][j] != ' ':
+                piece = state[i][j]
+                if piece == ai_piece:
+                    index_ai.append([i,j])
+                else:
+                    index_opp.append([i,j])
+
+    # evaluate AI's distance 
+    ai_dist_score = 0
+    count_ai = 6 # a total of 6 comparison
+    for i in range(len(index_ai)):
+        for j in range(i, len(index_ai)):
+            # calcualting between each two pieces.
+            if i != j:
+                count_ai+=1
+                # prioritize in a row or column, Bgive higher score for those.
+                if index_ai[i][0] == index_ai[j][0]: 
+                    if index_ai[i][1] - index_ai[j][1] <= 1:
+                        ai_dist_score += 1
+                    elif index_ai[i][1] - index_ai[j][1] <= 2:
+                        ai_dist_score += 0.5
+                    else:
+                        ai_dist_score += 1/(dist(index_ai[i], index_ai[j]) + 2)
+                elif index_ai[i][1] == index_ai[j][1]:
+                    if index_ai[i][0] - index_ai[j][0] <= 1:
+                        ai_dist_score += 1
+                    elif index_ai[i][0] - index_ai[j][0] <= 2:
+                        ai_dist_score += 0.5
+                    else:
+                        ai_dist_score += 1/(dist(index_ai[i], index_ai[j]) + 2)
+                # if not, use distance function to evaluate the distance, and then normalize it to give a score
+                else:
+                    ai_dist_score += 1/(dist(index_ai[i], index_ai[j]) + 2)
+    #ai_total = (ai_pos_score + ai_dist_score) / 10
+    ai_total = ai_dist_score / count_ai 
+
+    # do the same for opponent
+    opp_dist_score = 0
+    count_opp = 6
+    for i in range(len(index_opp)):
+        for j in range(i, len(index_opp)):
+            if i != j:
+                count_opp += 1
+                if index_opp[i][0] == index_opp[j][0]: 
+                    if index_opp[i][1] - index_opp[j][1] <= 1:
+                        opp_dist_score += 1
+                    elif index_opp[i][1] - index_opp[j][1] <= 2:
+                        opp_dist_score += 0.5
+                    else:
+                        opp_dist_score += 1/(dist(index_opp[i], index_opp[j]) + 2) 
+                elif index_opp[i][1] == index_opp[j][1]:
+                    if index_opp[i][0] - index_opp[j][0] <= 1:
+                        opp_dist_score += 1
+                    elif index_opp[i][0] - index_opp[j][0] <= 2:
+                        opp_dist_score += 0.5
+                    else:
+                        opp_dist_score += 1/(dist(index_opp[i], index_opp[j]) + 2)
+                else:
+                    opp_dist_score += 1/(dist(index_opp[i], index_opp[j]) + 2)
+    #opp_total = (opp_pos_score + opp_dist_score) / 10
+    opp_total = (opp_dist_score) / count_opp 
+
+    # return the difference between their score (has to be <1 or >1)
+    return ai_total - opp_total
+
+def dist(index1, index2):
+    """
+    Helper function to calculate the euclidian distance between two indexes.
+    param: two indices
+    return: their euclidean distances
+    """
+    return (abs(index1[0] - index2[0])**2 + abs(index1[1] - index2[1])**2)**0.5
+
+def max_value(state, depth):
+    """
+    Minimax function, return the max between current state's value and successfor's value
+    """
+    # if already terminal state
+    if game_value(state) == 1 or game_value(state) == -1:
+        return game_value(state)
+    # depth of 2 guarantees run time under 5 min
+    elif depth == 2:
+        return heuristic_game_value(state)
+    else:
+        value = -999 # we know game value must be at least -1 and most 1
+        for s in success(state, ai_piece):
+            value = max(value, min_value(s, depth+1)) # recursive case - we look for the max value
+        return value
+    
+def min_value(state, depth):
+    """
+    Min part of the minimax. Return the min value between state and successors.
+    """
+    # if already at terminal state
+    if game_value(state) == 1 or game_value(state) == -1:
+        return game_value(state)
+    # if reached depth already, evaluate heuristically
+    elif depth == 2: 
+        return heuristic_game_value(state)
+    else:
+        value = 999 # we know value must be at least -1 and at most 1.
+        for s in success(state, player_piece):
+            value = min(value, max_value(s, depth + 1)) # look for min
+        return value
     
 
 # initialize pygame
