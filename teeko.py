@@ -3,8 +3,8 @@ import random
 import copy
 
 # pieces
-ai_piece = random.choice(['r', 'b'])
-player_piece = 'r' if ai_piece == 'b' else 'b'
+ai_piece = random.choice(['R', 'B'])
+player_piece = 'R' if ai_piece == 'B' else 'B'
 # AI's functions
 def make_move(state):
     """ Selects a (row, col) space for the next move. You may assume that whenever
@@ -50,7 +50,7 @@ def make_move(state):
         best_score = None
         # find the best possible state use minimax
         for succ in success(state, ai_piece):
-            score = self.max_value(succ, 0)
+            score = max_value(succ, 0)
             if best_state == None or score > best_score:
                 best_state = succ
                 best_score = score
@@ -82,7 +82,7 @@ def make_move(state):
         best = None
         max_score = None
         for succ in success(state, ai_piece):
-            score = self.max_value(succ, 0)
+            score = max_value(succ, 0)
             if best == None or score > max_score:
                 best = succ
                 max_score = score
@@ -441,7 +441,12 @@ while running:
             cell_y = mouse_pos[1] // cell_size
 
             # update game state
-            game_state[cell_y][cell_x] = 1
+            game_state[cell_y][cell_x] = player_piece
+
+            # determine ai move
+            ai_move = make_move(game_state)
+
+            game_state[ai_move[0][0]][ai_move[0][1]] = ai_piece
 
     # fill
     screen.fill(dark_gray)
@@ -449,9 +454,9 @@ while running:
     # pieces
     for y in range(grid_size):
         for x in range(grid_size):
-            if game_state[y][x] == 1:
+            if game_state[y][x] == player_piece:
                 pygame.draw.circle(screen, (0, 255, 0), (x * cell_size + cell_size // 2, y * cell_size + cell_size // 2), cell_size // 2 - 5)
-            elif game_state[y][x] == 2:
+            elif game_state[y][x] == ai_piece:
                 pygame.draw.circle(screen, (255, 0, 0), (x * cell_size + cell_size // 2, y * cell_size + cell_size // 2), cell_size // 2 - 5)
 
     #grid
