@@ -426,6 +426,13 @@ piece_location = None
 
 num_piece = 0
 
+first_move = random.choice(['player', 'ai'])
+
+if first_move == 'ai':
+    ai_move = make_move(game_state, num_piece)
+    game_state[ai_move[0][0]][ai_move[0][1]] = ai_piece
+    num_piece += 1
+    
 # game loop
 running = True
 while running:
