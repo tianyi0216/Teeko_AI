@@ -6,7 +6,7 @@ import copy
 ai_piece = random.choice(['R', 'B'])
 player_piece = 'R' if ai_piece == 'B' else 'B'
 # AI's functions
-def make_move(state):
+def make_move(state, num_piece):
     """ Selects a (row, col) space for the next move. You may assume that whenever
     this function is called, it is this player's turn to move.
 
@@ -33,12 +33,6 @@ def make_move(state):
         """
        
     # determine if it is drop phase or not
-    num_piece = 0
-    for row in state:
-        for column in row:
-            if column != ' ':
-                num_piece += 1
-
     drop_phase = True if num_piece < 8 else False  
         
     # select an unoccupied space randomly
@@ -49,8 +43,8 @@ def make_move(state):
         best_state = None
         best_score = None
         # find the best possible state use minimax
-        for succ in success(state, ai_piece):
-            score = max_value(succ, 0)
+        for succ in success(state, ai_piece, num_piece):
+            score = max_value(succ, 0, num_piece)
             if best_state == None or score > best_score:
                 best_state = succ
                 best_score = score
@@ -81,8 +75,8 @@ def make_move(state):
             # find the best possible state using minimax.
         best = None
         max_score = None
-        for succ in success(state, ai_piece):
-            score = max_value(succ, 0)
+        for succ in success(state, ai_piece, num_piece):
+            score = max_value(succ, 0, num_piece)
             if best == None or score > max_score:
                 best = succ
                 max_score = score
@@ -98,16 +92,16 @@ def make_move(state):
                     target_row = i
                     target_col = j
                     
-                    # if original is piece but new state is empty, the source point
-                    if state[i][j] == ai_piece and best[i][j] == ' ':
-                        source_row = i
-                        source_col = j
+                # if original is piece but new state is empty, the source point
+                if state[i][j] == ai_piece and best[i][j] == ' ':
+                    source_row = i
+                    source_col = j
 
         move.append((source_row, source_col))
         move.insert(0, (target_row, target_col))
         return move
     
-def success(state, curr_piece):
+def success(state, curr_piece, num_piece):
     """
     Get all the successors of the current state
     param: state: the current state of board, to generate new states. curr_piece: which player's move, r or b
@@ -117,13 +111,8 @@ def success(state, curr_piece):
     legal_succs = []
 
     # check if it is in drop phase or not
-    num_piece = 0
-    for row in state:
-        for column in row:
-            if column != ' ':
-                num_piece += 1
-
     drop_phase = True if num_piece < 8 else False
+
     # if drop phase, just replace one space a time with the current player's piece
     if drop_phase:
         for i in range(len(state)):
@@ -375,7 +364,7 @@ def dist(index1, index2):
     """
     return (abs(index1[0] - index2[0])**2 + abs(index1[1] - index2[1])**2)**0.5
 
-def max_value(state, depth):
+def max_value(state, depth, num_piece):
     """
     Minimax function, return the max between current state's value and successfor's value
     """
@@ -387,11 +376,11 @@ def max_value(state, depth):
         return heuristic_game_value(state)
     else:
         value = -999 # we know game value must be at least -1 and most 1
-        for s in success(state, ai_piece):
-            value = max(value, min_value(s, depth+1)) # recursive case - we look for the max value
+        for s in success(state, ai_piece, num_piece):
+            value = max(value, min_value(s, depth+1, num_piece)) # recursive case - we look for the max value
         return value
     
-def min_value(state, depth):
+def min_value(state, depth, num_piece):
     """
     Min part of the minimax. Return the min value between state and successors.
     """
@@ -403,9 +392,13 @@ def min_value(state, depth):
         return heuristic_game_value(state)
     else:
         value = 999 # we know value must be at least -1 and at most 1.
-        for s in success(state, player_piece):
-            value = min(value, max_value(s, depth + 1)) # look for min
+        for s in success(state, player_piece, num_piece):
+            value = min(value, max_value(s, depth + 1, num_piece)) # look for min
         return value
+    
+def adjacent(cell1, cell2):
+    return abs(cell1[0] - cell2[0]) <= 1 and abs(cell1[1] - cell2[1]) <= 1
+
     
 
 # initialize pygame
@@ -427,6 +420,12 @@ cell_size = window_size[0] // grid_size
 # initial game state
 game_state = [[' ' for _ in range(grid_size)] for _ in range(grid_size)]
 
+# track if a piece is selected
+piece_selected = False
+piece_location = None
+
+num_piece = 0
+
 # game loop
 running = True
 while running:
@@ -440,13 +439,47 @@ while running:
             cell_x = mouse_pos[0] // cell_size
             cell_y = mouse_pos[1] // cell_size
 
-            # update game state
-            game_state[cell_y][cell_x] = player_piece
+            # if in move phase
+            if num_piece >= 8:
+                # piece selected
+                if piece_selected:
+                    if game_state[cell_y][cell_x] == ' ' and adjacent(piece_location, (cell_y, cell_x)):
+                        game_state[cell_y][cell_x] = player_piece
+                        game_state[piece_location[0]][piece_location[1]] = ' '
+                        piece_selected = False
+                        piece_location = None
+                else:
+                    if game_state[cell_y][cell_x] == player_piece:
+                        piece_selected = True
+                        piece_location = (cell_y, cell_x)
+            # if in drop phase
+            else:
+                if game_state[cell_y][cell_x] == ' ':
+                    game_state[cell_y][cell_x] = player_piece
+                    num_piece += 1
 
-            # determine ai move
-            ai_move = make_move(game_state)
+            # AI's move
+            if num_piece >= 8:
+                 # determine ai move
+                ai_move = make_move(game_state, num_piece)
+                game_state[ai_move[0][0]][ai_move[0][1]] = ai_piece
+                game_state[ai_move[1][0]][ai_move[1][1]] = ' '
 
-            game_state[ai_move[0][0]][ai_move[0][1]] = ai_piece
+            else:
+                ai_move = make_move(game_state, num_piece)
+                game_state[ai_move[0][0]][ai_move[0][1]] = ai_piece
+                num_piece += 1
+    status = game_value(game_state)
+    if status != 0:
+        print(status)
+        if status == 1:
+            print("AI wins!")
+            running = False
+        elif status == -1:
+            print("Player wins!")
+            running = False
+
+            
 
     # fill
     screen.fill(dark_gray)
