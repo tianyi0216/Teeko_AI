@@ -448,6 +448,32 @@ while running:
                         game_state[piece_location[0]][piece_location[1]] = ' '
                         piece_selected = False
                         piece_location = None
+
+                        status = game_value(game_state)
+                        if status != 0:
+                            if status == 1:
+                                print("AI wins!")
+                                running = False
+                                break
+                            elif status == -1:
+                                print("Player wins!")
+                                running = False
+                                break
+
+                         # determine ai move
+                        ai_move = make_move(game_state, num_piece)
+                        game_state[ai_move[0][0]][ai_move[0][1]] = ai_piece
+                        game_state[ai_move[1][0]][ai_move[1][1]] = ' '
+                        status = game_value(game_state)
+                        if status != 0:
+                            if status == 1:
+                                print("AI wins!")
+                                running = False
+                                break
+                            elif status == -1:
+                                print("Player wins!")
+                                running = False
+                                break
                 else:
                     if game_state[cell_y][cell_x] == player_piece:
                         piece_selected = True
@@ -457,30 +483,31 @@ while running:
                 if game_state[cell_y][cell_x] == ' ':
                     game_state[cell_y][cell_x] = player_piece
                     num_piece += 1
+                    status = game_value(game_state)
+                    if status != 0:
+                        if status == 1:
+                            print("AI wins!")
+                            running = False
+                            break
+                        elif status == -1:
+                            print("Player wins!")
+                            running = False
+                            break
 
-            # AI's move
-            if num_piece >= 8:
-                 # determine ai move
-                ai_move = make_move(game_state, num_piece)
-                game_state[ai_move[0][0]][ai_move[0][1]] = ai_piece
-                game_state[ai_move[1][0]][ai_move[1][1]] = ' '
-
-            else:
-                ai_move = make_move(game_state, num_piece)
-                game_state[ai_move[0][0]][ai_move[0][1]] = ai_piece
-                num_piece += 1
-    status = game_value(game_state)
-    if status != 0:
-        print(status)
-        if status == 1:
-            print("AI wins!")
-            running = False
-        elif status == -1:
-            print("Player wins!")
-            running = False
-
-            
-
+                    ai_move = make_move(game_state, num_piece)
+                    game_state[ai_move[0][0]][ai_move[0][1]] = ai_piece
+                    num_piece += 1
+                    status = game_value(game_state)
+                    if status != 0:
+                        if status == 1:
+                            print("AI wins!")
+                            running = False
+                            break
+                        elif status == -1:
+                            print("Player wins!")
+                            running = False
+                            break
+    
     # fill
     screen.fill(dark_gray)
 
