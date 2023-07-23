@@ -397,9 +397,20 @@ def min_value(state, depth, num_piece):
         return value
     
 def adjacent(cell1, cell2):
+    """
+    Check if two cells are adjacent to each other
+    """
     return abs(cell1[0] - cell2[0]) <= 1 and abs(cell1[1] - cell2[1]) <= 1
 
-    
+def winning_text(text, pos):
+    """
+    Display the winning text
+    """
+    font = pygame.font.Font(None, 36)
+    surface = font.render(text, 1, (255, 255, 255))
+    rect = surface.get_rect(center=pos)
+    pygame.draw.rect(screen, (0, 0, 0), rect)  # Draw a black rectangle behind the text
+    screen.blit(surface, rect)
 
 # initialize pygame
 pygame.init()
@@ -432,7 +443,7 @@ if first_move == 'ai':
     ai_move = make_move(game_state, num_piece)
     game_state[ai_move[0][0]][ai_move[0][1]] = ai_piece
     num_piece += 1
-    
+
 # game loop
 running = True
 while running:
@@ -460,10 +471,16 @@ while running:
                         if status != 0:
                             if status == 1:
                                 print("AI wins!")
+                                winning_text("You lose!", (250, 250))
+                                pygame.display.flip()
+                                pygame.time.wait(3000)
                                 running = False
                                 break
                             elif status == -1:
                                 print("Player wins!")
+                                winning_text("You win!", (250, 250))
+                                pygame.display.flip()
+                                pygame.time.wait(3000)
                                 running = False
                                 break
 
@@ -475,10 +492,16 @@ while running:
                         if status != 0:
                             if status == 1:
                                 print("AI wins!")
+                                winning_text("You lose!", (250, 250))
+                                pygame.display.flip()
+                                pygame.time.wait(3000)
                                 running = False
                                 break
                             elif status == -1:
                                 print("Player wins!")
+                                winning_text("You win!", (250, 250))
+                                pygame.display.flip()
+                                pygame.time.wait(3000)
                                 running = False
                                 break
                 else:
@@ -494,10 +517,16 @@ while running:
                     if status != 0:
                         if status == 1:
                             print("AI wins!")
+                            winning_text("You lose!", (250, 250))
+                            pygame.display.flip()
+                            pygame.time.wait(3000)
                             running = False
                             break
                         elif status == -1:
                             print("Player wins!")
+                            winning_text("You win!", (250, 250))
+                            pygame.display.flip()
+                            pygame.time.wait(3000)
                             running = False
                             break
 
@@ -508,10 +537,16 @@ while running:
                     if status != 0:
                         if status == 1:
                             print("AI wins!")
+                            winning_text("You lose!", (250, 250))
+                            pygame.display.flip()
+                            pygame.time.wait(3000)
                             running = False
                             break
                         elif status == -1:
                             print("Player wins!")
+                            winning_text("You win!", (250, 250))
+                            pygame.display.flip()
+                            pygame.time.wait(3000)
                             running = False
                             break
     
